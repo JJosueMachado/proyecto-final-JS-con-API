@@ -23,7 +23,6 @@ function agregarAlCarrito(nombre, precio) {
   }
 
   actualizarListaCarrito();
-
   actualizarTotales();
   guardarCarritoLocalStorage();
   ////SWEET ALERT////
@@ -94,6 +93,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const limpiarCarritoBtn = document.getElementById("limpiarCarrito");
   limpiarCarritoBtn.addEventListener("click", limpiarCarrito);
+
+  // Llamando a las funciones relacionadas con la API fuera de main()
+  mostrarProductos(informacionProductos);
+  document
+    .getElementById("buscadorProductos")
+    .addEventListener("input", filtrarProductos);
 });
 
 function limpiarCarrito() {
@@ -131,6 +136,38 @@ function actualizarTotales() {
   })}`;
 }
 
+// Funciones para mostrar y filtrar productos ahora están fuera de main()
+function mostrarProductos(productosFiltrados) {
+  const contenedor = document.getElementById("contenedorProductos");
+  contenedor.innerHTML = "";
+  productosFiltrados.map((informacionProductos) => {
+    const divProducto = document.createElement("div");
+    divProducto.classList.add("card", "m-2");
+    divProducto.style.width = "18rem";
+    divProducto.innerHTML = `
+          <div class="card-body">
+          <img src="${informacionProductos.img}" class="card-img-top" alt="Imagen de ${informacionProductos.nombre}">
+              <h5 class="card-title">${informacionProductos.nombre}</h5>
+              <p class="card-text">${informacionProductos.descripcion}</p>
+              <p class="card-text">Precio: ${informacionProductos.precio}</p>
+              <button class="btn btn-primary" onclick="agregarAlCarrito('${informacionProductos.nombre}', ${informacionProductos.precio})">Agregar al Carrito</button>
+          </div>
+      `;
+    contenedor.appendChild(divProducto);
+  });
+}
+
+function filtrarProductos() {
+  const textoBusqueda = document
+    .getElementById("buscadorProductos")
+    .value.toLowerCase();
+  const productosFiltrados = informacionProductos.filter(
+    (informacionProductos) =>
+      informacionProductos.nombre.toLowerCase().includes(textoBusqueda)
+  );
+  mostrarProductos(productosFiltrados);
+}
+
 // /////////////LLAMADO A LA API//////////////
 function obtenerProductos() {
   return new Promise((resolve, reject) => {
@@ -149,42 +186,6 @@ function obtenerProductos() {
 async function main() {
   try {
     const informacionProductos = await obtenerProductos();
-
-    function mostrarProductos(productosFiltrados) {
-      const contenedor = document.getElementById("contenedorProductos");
-      contenedor.innerHTML = "";
-      productosFiltrados.map((informacionProductos) => {
-        const divProducto = document.createElement("div");
-        divProducto.classList.add("card", "m-2");
-        divProducto.style.width = "18rem";
-        divProducto.innerHTML = `
-              <div class="card-body">
-              <img src="${informacionProductos.img}" class="card-img-top" alt="Imagen de ${informacionProductos.nombre}">
-                  <h5 class="card-title">${informacionProductos.nombre}</h5>
-                  <p class="card-text">${informacionProductos.descripcion}</p>
-                  <p class="card-text">Precio: ${informacionProductos.precio}</p>
-                  <button class="btn btn-primary" onclick="agregarAlCarrito('${informacionProductos.nombre}', ${informacionProductos.precio})">Agregar al Carrito</button>
-              </div>
-          `;
-        contenedor.appendChild(divProducto);
-      });
-    }
-
-    function filtrarProductos() {
-      const textoBusqueda = document
-        .getElementById("buscadorProductos")
-        .value.toLowerCase();
-      const productosFiltrados = informacionProductos.filter(
-        (informacionProductos) =>
-          informacionProductos.nombre.toLowerCase().includes(textoBusqueda)
-      );
-      mostrarProductos(productosFiltrados);
-    }
-
-    document
-      .getElementById("buscadorProductos")
-      .addEventListener("input", filtrarProductos);
-
     mostrarProductos(informacionProductos);
   } catch (error) {
     console.error("Error en la app", error);
